@@ -1,0 +1,91 @@
+Sub 发送邮件()
+    Dim startTime As Date
+    Dim endTime As Date
+    Dim currentTime As Date
+    Dim executeTime As Date
+
+    ' 设置执行的开始时间和结束时间
+    startTime = TimeSerial(7, 3, 0)  '设置执行的开始时间，这里设置为上午7点3分
+    endTime = TimeSerial(7, 10, 0) '设置执行的结束时间，这里设置为上午7点10分
+
+    ' 获取当前时间
+    currentTime = TimeValue(Now())
+
+    ' 判断当前时间是否在执行时间范围内
+    If currentTime >= startTime And currentTime <= endTime Then
+        Dim 邮件应用 As Object
+        Dim 邮件项目 As Object
+        Dim 表格 As Worksheet
+        Dim 最后一行 As Long
+        Dim 当前行 As Long
+        Dim 日期列 As Long
+        Dim 内容列 As Long
+        Dim 收件人 As String
+        Dim 抄送人 As String
+        Dim 密送人 As String
+        Dim 主题 As String
+        Dim 合并内容 As String
+        Dim Source As String
+        
+        '设置邮件应用为Outlook
+        Set 邮件应用 = CreateObject("Outlook.Application")
+        
+        '设置表格为当前活动表格
+        Set 表格 = ActiveSheet
+        
+        '设置日期列为I列，内容列为J列
+        提醒日期列 = 9
+        下一次校准日期列 = 8
+        提醒内容列 = 11
+        
+        '获取表格中的最后一行
+        最后一行 = 表格.Cells(Rows.Count, 提醒日期列).End(xlUp).Row
+        
+        '设置收件人和主题
+        收件人 = "309086159@qq.com"
+        主题 = "设备再确认提醒"
+        
+        '设置抄送人和密送人，用分号分隔多个收件人的邮箱地址
+        抄送人 = "1114736194@qq.com"
+        密送人 = ""
+        
+        '初始化合并内容为空字符串
+        合并内容 = ""
+        
+        '循环遍历表格中的每一行
+        For 当前行 = 1 To 最后一行
+            '如果当前行的日期列等于系统日期，则将当前行的内容列的值追加到合并内容中
+            If 表格.Cells(当前行, 提醒日期列).Value <= Date And 表格.Cells(当前行, 下一次校准日期列).Value >= Date Then
+                合并内容 = 合并内容 & 表格.Cells(当前行, 提醒内容列).Value
+            End If
+        Next 当前行
+        
+        '如果合并内容不为空，则发送邮件
+        If 合并内容 <> "" Then
+            '创建一个新的邮件项目
+            Set 邮件项目 = 邮件应用.CreateItem(0)
+            
+            '设置邮件项目的属性
+            With 邮件项目
+                .To = 收件人
+                .CC = 抄送人
+                .BCC = 密送人
+                .Subject = 主题
+                .Body = 合并内容
+                '添加附件
+                Source = ThisWorkbook.FullNam
+                .Attachments.Add Source
+                '发送邮件
+                .Send
+            End With
+        End If
+   
+        ThisWorkbook.Close SaveChanges:=False
+        Application.DisplayAlerts = False
+        Application.Quit
+        Dim strCmd As String
+        strCmd = "taskkill /F /IM EXCEL.EXE" '构造taskkill命令，/F表示强制终止，/IM表示按照映像名称匹配
+        Shell strCmd, vbHide '执行Shell命令，vbHide表示隐藏命令提示符窗口
+    End If
+End Sub
+    
