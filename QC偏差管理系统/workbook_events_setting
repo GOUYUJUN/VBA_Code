@@ -6,6 +6,8 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
     Selection.ClearContents
     Sheet1.Select
     Sheet1.Range("B4:I16").ClearContents
+    Sheet1.Range("B2").Value = ""
+    Sheet1.Range("H2").Value = ""
     ThisWorkbook.Close SaveChanges:=True
     Application.DisplayAlerts = False
         Application.Quit
@@ -17,7 +19,7 @@ End Sub
 Private Sub Workbook_Open()
 Call Import_Data_from_Access
 Sheet1.Select
-Range("A1:J1").Select
+Range("A1").Select
 End Sub
 
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
@@ -36,3 +38,4 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
         End If
     End If
 End Sub
+
