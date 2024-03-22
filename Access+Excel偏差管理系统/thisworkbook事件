@@ -15,3 +15,16 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
         strCmd = "taskkill /F /IM EXCEL.EXE" '构造taskkill命令，/F表示强制终止，/IM表示按照映像名称匹配
         Shell strCmd, vbHide '执行Shell命令，vbHide表示隐藏命令提示符窗口
 End Sub
+'设置关闭EXCEL workbook时运行的模块 beforeclose事件
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    ThisWorkbook.Close SaveChanges:=True
+    Application.DisplayAlerts = False
+        Application.Quit
+        Dim strCmd As String
+        strCmd = "taskkill /F /IM EXCEL.EXE" '构造taskkill命令，/F表示强制终止，/IM表示按照映像名称匹配
+        Shell strCmd, vbHide '执行Shell命令，vbHide表示隐藏命令提示符窗口
+End Sub
+
+Private Sub Workbook_Open()
+Sheet1.Range("A1").Select
+End Sub

@@ -65,6 +65,6 @@ Sub Import_Data_from_Access()
   ' Close the connection
   If Not rs Is Nothing Then rs.Close
   If Not conn Is Nothing Then conn.Close
-
+  Sheet1.Select
 End Sub
 

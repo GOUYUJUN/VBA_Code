@@ -1,0 +1,37 @@
+Sub CalculateQCCount()
+    Dim wsStats As Worksheet, wsOptions As Worksheet, wsEvents As Worksheet
+    Dim rngStats As Range, cell As Range
+    Dim startTime As Date, endTime As Date
+    Dim countQC As Integer, i As Integer
+    
+    ' 设置工作表
+    Set wsStats = ThisWorkbook.Sheets("统计表")
+    Set wsOptions = ThisWorkbook.Sheets("选项信息")
+    Set wsEvents = ThisWorkbook.Sheets("Events")
+    
+    ' 尝试设置开始时间和结束时间
+    On Error Resume Next
+    startTime = wsEvents.Range("B2").Value
+    endTime = wsEvents.Range("H2").Value
+     On Error GoTo 0
+     
+      ' 检查是否成功获取了日期时间格式的值
+    If IsDate(startTime) And IsDate(endTime) Then
+    
+     ' 遍历统计表中的A列
+     For i = 4 To 16
+         ' 检查统计表中的值是否与选项信息表中的值匹配
+         If wsStats.Cells(i, 1).Value = wsOptions.Cells(i, 6).Value Then
+             ' 如果匹配，计算QC部的数量
+             countQC = Application.WorksheetFunction.CountIfs(wsEvents.Range("N:N"), "QC部", _
+                                                             wsEvents.Range("B:B"), ">=" & startTime, _
+                                                             wsEvents.Range("B:B"), "<=" & endTime)
+             ' 将计算结果赋值给统计表的B列
+             wsStats.Cells(i, 2).Value = countQC
+         End If
+    
+     Next i
+  Else
+   MsgBox "请确保B2和H2单元格中包含有效的日期时间格式。"
+  End If
+End Sub

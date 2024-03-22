@@ -1,0 +1,7 @@
+Sub clear_data()
+Sheets(Array("Events", "SSF", "OOX", "偏差", "选项信息")).Select
+    Range("A1:Z100000").Select
+    Selection.ClearContents
+    Application.DisplayAlerts = False
+    Sheet1.Select
+End Sub
