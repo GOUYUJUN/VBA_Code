@@ -1,0 +1,41 @@
+
+'设置关闭EXCEL workbook时运行的模块 beforeclose事件
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Sheets(Array("Events", "SSF", "OOX", "偏差", "选项信息")).Select
+    Range("A1:Z100000").Select
+    Selection.ClearContents
+    Sheet1.Select
+    Sheet1.Range("B4:I16").ClearContents
+    Sheet1.Range("B2").Value = ""
+    Sheet1.Range("H2").Value = ""
+    ThisWorkbook.Close SaveChanges:=True
+    Application.DisplayAlerts = False
+        Application.Quit
+        Dim strCmd As String
+        strCmd = "taskkill /F /IM EXCEL.EXE" '构造taskkill命令，/F表示强制终止，/IM表示按照映像名称匹配
+        Shell strCmd, vbHide '执行Shell命令，vbHide表示隐藏命令提示符窗口
+End Sub
+
+Private Sub Workbook_Open()
+Call Import_Data_from_Access
+Sheet1.Select
+Range("A1").Select
+End Sub
+
+Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
+    ' 确保事件仅在特定工作表上触发
+    If Sh.Name = "统计表" Then
+        ' 检查更改是否发生在B2或H2单元格
+        If Not Intersect(Target, Sh.Range("B2")) Is Nothing Or Not Intersect(Target, Sh.Range("H2")) Is Nothing Then
+            ' 检查B2和H2单元格是否都不为空
+            If Sh.Range("B2").Value <> "" And Sh.Range("H2").Value <> "" Then
+                ' 执行宏
+                Call CalculateQCCount
+            Else
+                Sheet1.Select
+                Sheet1.Range("B4:I16").ClearContents
+            End If
+        End If
+    End If
+End Sub
+

@@ -1,0 +1,76 @@
+Sub CalculateQCCount()
+    Dim wsStats, wsOptions, wsEvents, wsSSF, wsOOX, wsDev As Worksheet
+    Dim startTime, endTime As Date
+    Dim countEvents, countSSF, count_qualified_OOS, count_invalid_OOS, count_qualified_OOE, count_invalid_OOE, count_Dev, count_validation_Dev, i, j, k As Integer
+    
+    ' 设置工作表
+    Set wsStats = ThisWorkbook.Sheets("统计表")
+    Set wsOptions = ThisWorkbook.Sheets("选项信息")
+    Set wsEvents = ThisWorkbook.Sheets("Events")
+    Set wsSSF = ThisWorkbook.Sheets("SSF")
+    Set wsOOX = ThisWorkbook.Sheets("OOX")
+    Set wsDev = ThisWorkbook.Sheets("偏差")
+    
+    
+    ' 尝试设置开始时间和结束时间
+    On Error Resume Next
+    startTime = wsStats.Range("B2").Value
+    endTime = wsStats.Range("H2").Value
+     On Error GoTo 0
+     
+      ' 检查是否成功获取了日期时间格式的值
+    If IsDate(startTime) And IsDate(endTime) Then
+    
+     ' 遍历统计表中的A列
+     For i = 4 To 16
+         ' 检查统计表中的值是否与选项信息表中的值匹配
+         If wsStats.Range("A" & i) = wsOptions.Range("F" & i - 2) Then
+             ' 如果匹配，计算QC部的数量
+            countEvents = Application.WorksheetFunction.CountIfs(wsEvents.Range("N:N"), "QC部", wsEvents.Range("J:J"), wsStats.Range("A" & i).Value, _
+                                                                 wsEvents.Range("B:B"), ">=" & startTime, _
+                                                                 wsEvents.Range("B:B"), "<=" & endTime)
+                                                                 
+            countSSF = Application.WorksheetFunction.CountIfs(wsSSF.Range("N:N"), "QC部", wsSSF.Range("J:J"), wsStats.Range("A" & i).Value, _
+                                                                     wsSSF.Range("B:B"), ">=" & startTime, _
+                                                                     wsSSF.Range("B:B"), "<=" & endTime)
+                                                                     
+            count_qualified_OOS = Application.WorksheetFunction.CountIfs(wsOOX.Range("N:N"), "确认的OOS", _
+                                                                     wsOOX.Range("B:B"), ">=" & startTime, _
+                                                                     wsOOX.Range("B:B"), "<=" & endTime)
+                                                                     
+            count_invalid_OOS = Application.WorksheetFunction.CountIfs(wsOOX.Range("M:M"), "QC部", wsOOX.Range("N:N"), "无效的OOS", wsOOX.Range("J:J"), wsStats.Range("A" & i).Value, _
+                                                                     wsOOX.Range("B:B"), ">=" & startTime, _
+                                                                     wsOOX.Range("B:B"), "<=" & endTime)
+              
+            count_qualified_OOE = Application.WorksheetFunction.CountIfs(wsOOX.Range("N:N"), "确认的OOE", _
+                                                                     wsOOX.Range("B:B"), ">=" & startTime, _
+                                                                     wsOOX.Range("B:B"), "<=" & endTime)
+            
+            count_invalid_OOE = Application.WorksheetFunction.CountIfs(wsOOX.Range("M:M"), "QC部", wsOOX.Range("N:N"), "无效的OOE", wsOOX.Range("J:J"), wsStats.Range("A" & i).Value, _
+                                                                     wsOOX.Range("B:B"), ">=" & startTime, _
+                                                                     wsOOX.Range("B:B"), "<=" & endTime)
+                                                                     
+            count_Dev = Application.WorksheetFunction.CountIfs(wsDev.Range("D:D"), "GMP偏差", wsDev.Range("N:N"), "QC部", wsDev.Range("K:K"), wsStats.Range("A" & i).Value, _
+                                                                 wsDev.Range("B:B"), ">=" & startTime, _
+                                                                 wsDev.Range("B:B"), "<=" & endTime)
+                                                                 
+           count_validation_Dev = Application.WorksheetFunction.CountIfs(wsDev.Range("D:D"), "验证偏差", wsDev.Range("N:N"), "QC部", wsDev.Range("K:K"), wsStats.Range("A" & i).Value, _
+                                                                 wsDev.Range("B:B"), ">=" & startTime, _
+                                                                 wsDev.Range("B:B"), "<=" & endTime)
+                 ' 将计算结果赋值给统计表的B列
+            wsStats.Range("B" & i).Value = countEvents
+            wsStats.Range("C" & i).Value = countSSF
+            wsStats.Range("D4").Value = count_qualified_OOS
+            wsStats.Range("E" & i).Value = count_invalid_OOS
+            wsStats.Range("F4").Value = count_qualified_OOE
+            wsStats.Range("G" & i).Value = count_invalid_OOE
+            wsStats.Range("H" & i).Value = count_Dev
+            wsStats.Range("I" & i).Value = count_validation_Dev
+         End If
+         
+    
+     Next i
+  Else
+   MsgBox "请确保B2和H2单元格中包含有效的日期时间格式。"
+  End If
+End Sub

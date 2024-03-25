@@ -1,0 +1,71 @@
+Sub Import_Data_from_Access()
+
+  ' Declare variables
+  Dim wb As Workbook
+  Dim ws As Worksheet
+  Dim dbPath As String
+  Dim conn As Object
+  Dim rs As Object
+  Dim sql As String
+  Dim tbNames As Variant ' Access table names array
+  Dim tbName As Variant ' Access table name
+  Dim i As Integer
+  
+  ' Set workbook
+  Set wb = ThisWorkbook
+  
+  ' Set ACCESS database path
+  dbPath = "D:\VBA\偏差管理系统\QC实验室管理系统by苟育军V7.accdb"
+  
+  ' Establish database connection
+  Set conn = CreateObject("ADODB.Connection")
+  conn.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & dbPath
+  
+  ' Declare the array of Access table names to fetch
+  tbNames = Array("Events", "SSF", "OOX", "偏差", "选项信息")
+  
+  ' Iterate through the Access tables to fetch
+  For Each tbName In tbNames
+    ' Find the corresponding Excel worksheet, create a new one if not found
+    On Error Resume Next
+    Set ws = wb.Sheets(tbName)
+    If ws Is Nothing Then
+      Set ws = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+      ws.Name = tbName
+    End If
+    On Error GoTo 0
+    
+    ' Clear the content of the target worksheet
+    ws.UsedRange.clear
+    
+    ' Execute the SQL query
+    sql = "SELECT * FROM [" & tbName & "];"
+    Set rs = conn.Execute(sql)
+    
+    ' Import Form head and data into the worksheet
+    For i = 0 To rs.Fields.Count - 1
+      ws.cells(1, i + 1).Value = rs.Fields(i).Name
+    Next i
+    ws.Range("A2").CopyFromRecordset rs
+    
+    ' Set formats
+    ws.Rows(1).AutoFilter
+    ws.cells.VerticalAlignment = xlVAlignCenter
+    ws.cells.HorizontalAlignment = xlHAlignLeft
+    ws.cells.WrapText = False
+    ws.cells.ColumnWidth = 10
+    Sheets(tbName).Select
+        With ActiveWindow
+            .SplitColumn = 0
+            .SplitRow = 1
+        End With
+        ActiveWindow.FreezePanes = True
+  Next tbName
+  
+  ' Close the connection
+  If Not rs Is Nothing Then rs.Close
+  If Not conn Is Nothing Then conn.Close
+  Sheet1.Select
+  Range("A1:J1").Select
+
+End Sub
