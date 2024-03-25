@@ -1,0 +1,37 @@
+Sub Autoselection()
+    Dim startTime, endTime As Date
+    Dim ws As Worksheet
+    Dim wb As Workbook
+    Dim tbNames As Variant ' Access table names array
+    Dim tbName As Variant ' Access table name
+     ' 尝试设置开始时间和结束时间
+    On Error Resume Next
+    startTime = Worksheets("统计表").Range("B2").Value
+    endTime = Worksheets("统计表").Range("H2").Value
+    On Error GoTo 0
+    
+    ' 检查是否成功获取了日期时间格式的值
+    If IsDate(startTime) And IsDate(endTime) Then
+                                   
+             ' Declare the array of Access table names to fetch
+            tbNames = Array("Events", "SSF", "OOX", "偏差")
+                            
+         ' Iterate through the Access tables to fetch
+        For Each tbName In tbNames
+         ' Find the corresponding Excel worksheet, create a new one if not found
+            On Error Resume Next
+            Set ws = wb.Sheets(tbName)
+            If ws Is Nothing Then
+                Set ws = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+                ws.Name = tbName
+             End If
+            On Error GoTo 0
+                                  
+            Sheets(tbName).Range("A:Z").AutoFilter Field:=2, Criteria1:= _
+                                     ">= " & CLng(startTime), Operator:=xlAnd, Criteria2:="<= " & CLng(endTime)
+            
+                                     
+        Next tbName
+    End If
+                        
+End Sub
